@@ -2,6 +2,7 @@ package com.book.dan.locatr;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -43,6 +44,8 @@ public class LocatrFragment extends Fragment implements ExplanationDialogFragmen
     private ImageView mImageView;
     private GoogleApiClient mClient;
 
+    private ProgressDialog mProgressDialog;
+
     public static LocatrFragment newInstance(){
         return new LocatrFragment();
     }
@@ -66,6 +69,11 @@ public class LocatrFragment extends Fragment implements ExplanationDialogFragmen
                     }
                 })
                 .build();
+
+        mProgressDialog = new ProgressDialog(getActivity());
+        mProgressDialog.setTitle("Loading...");
+        mProgressDialog.setMessage("Wait while loading");
+        mProgressDialog.setIndeterminate(true);
     }
 
     @Override
@@ -137,6 +145,7 @@ public class LocatrFragment extends Fragment implements ExplanationDialogFragmen
                     public void onLocationChanged(Location location) {
                         Log.i(TAG,"Got a fix: "+location);
                         new SearchTask().execute(location);
+                        mProgressDialog.show();
                     }
                 });
     }
@@ -183,6 +192,7 @@ public class LocatrFragment extends Fragment implements ExplanationDialogFragmen
 
         @Override
         protected void onPostExecute(Void aVoid) {
+            mProgressDialog.dismiss();
             mImageView.setImageBitmap(mBitmap);
         }
     }
