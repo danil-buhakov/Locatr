@@ -1,4 +1,4 @@
-package com.book.dan.criminalintent;
+package com.book.dan.locatr;
 
 
 import android.os.Bundle;
