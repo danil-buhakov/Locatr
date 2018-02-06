@@ -3,7 +3,10 @@ package com.book.dan.locatr;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -23,6 +26,9 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+
+import java.io.IOException;
+import java.util.List;
 
 public class LocatrFragment extends Fragment {
     private static final String TAG = "LocatrFragment";
@@ -121,6 +127,7 @@ public class LocatrFragment extends Fragment {
                     @Override
                     public void onLocationChanged(Location location) {
                         Log.i(TAG,"Got a fix: "+location);
+                        new SearchTask().execute(location);
                     }
                 });
     }
@@ -134,5 +141,35 @@ public class LocatrFragment extends Fragment {
     public void onStop() {
         super.onStop();
         mClient.disconnect();
+    }
+
+    private class SearchTask extends AsyncTask<Location,Void,Void>{
+        private GalleryItem mGalleryItem;
+        private Bitmap mBitmap;
+
+        @Override
+        protected Void doInBackground(Location... locations) {
+            FlickrFetchr flickrFetchr = new FlickrFetchr();
+            List<GalleryItem> items = flickrFetchr.searchPhotos(locations[0]);
+
+            if(items.size()==0){
+                return null;
+            }
+
+            mGalleryItem = items.get(0);
+
+            try {
+                byte[] bytes = flickrFetchr.getUrlBytes(mGalleryItem.getUrl());
+                mBitmap = BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+            } catch (IOException ioe) {
+                Log.e(TAG,"Failed downloading bitmap",ioe);
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            mImageView.setImageBitmap(mBitmap);
+        }
     }
 }
