@@ -10,7 +10,9 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,7 +32,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import java.io.IOException;
 import java.util.List;
 
-public class LocatrFragment extends Fragment {
+public class LocatrFragment extends Fragment implements ExplanationDialogFragment.iAccept {
     private static final String TAG = "LocatrFragment";
     private static final String[] LOCATION_PERMISSIONS = new String[]{
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -93,7 +95,14 @@ public class LocatrFragment extends Fragment {
                 if(hasLocatePermissions())
                     findImage();
                 else
-                    requestPermissions(LOCATION_PERMISSIONS,REQUEST_LOCATE_PERMISSIONS);
+                    if(shouldShowRequestPermissionRationale(LOCATION_PERMISSIONS[0])){
+                        FragmentManager fm = getActivity().getSupportFragmentManager();
+                        ExplanationDialogFragment fragment = new ExplanationDialogFragment();
+                        fragment.setIAccept(this);
+                        fragment.show(fm,TAG);
+                    }
+                    else
+                        requestPermissions(LOCATION_PERMISSIONS,REQUEST_LOCATE_PERMISSIONS);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -141,6 +150,11 @@ public class LocatrFragment extends Fragment {
     public void onStop() {
         super.onStop();
         mClient.disconnect();
+    }
+
+    @Override
+    public void accept() {
+        requestPermissions(LOCATION_PERMISSIONS,REQUEST_LOCATE_PERMISSIONS);
     }
 
     private class SearchTask extends AsyncTask<Location,Void,Void>{
