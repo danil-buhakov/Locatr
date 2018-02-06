@@ -1,5 +1,6 @@
-package com.book.dan.photogallery;
+package com.book.dan.locatr;
 
+import android.location.Location;
 import android.net.Uri;
 import android.nfc.Tag;
 import android.util.Log;
@@ -62,6 +63,14 @@ public class FlickrFetchr {
         return uriBuilder.build().toString();
     }
 
+    private String buildUrl(Location location){
+        return ENDPOINT.buildUpon()
+                .appendQueryParameter("method",SEARCH_METHOD)
+                .appendQueryParameter("lat",""+location.getLatitude())
+                .appendQueryParameter("lon",""+location.getLongitude())
+                .build().toString();
+    }
+
     public List<GalleryItem> fetchRecentPhotos(){
         String url = buildUrl(FETCH_RECENT_METHOD,null);
         return downloadGallaryItems(url);
@@ -69,6 +78,11 @@ public class FlickrFetchr {
 
     public List<GalleryItem> searchPhotos(String query){
         String url = buildUrl(SEARCH_METHOD,query);
+        return downloadGallaryItems(url);
+    }
+
+    public List<GalleryItem> searchPhotos(Location location){
+        String url = buildUrl(location);
         return downloadGallaryItems(url);
     }
 

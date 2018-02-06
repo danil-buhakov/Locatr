@@ -1,4 +1,4 @@
-package com.book.dan.photogallery;
+package com.book.dan.locatr;
 
 import android.net.Uri;
 
